@@ -192,15 +192,15 @@ bind-key -n M-3 select-window -t 3
 bind-key -n M-4 select-window -t 4
 bind-key -n M-5 select-window -t 5
 
-# Pane navigation: ALT+H/J/K/L (vim-style, no prefix)
-bind-key -n M-h select-pane -L
-bind-key -n M-j select-pane -D
-bind-key -n M-k select-pane -U
-bind-key -n M-l select-pane -R
+# Pane navigation: ALT+ESDF (gaming-style, no prefix)
+bind-key -n M-s select-pane -L
+bind-key -n M-d select-pane -D
+bind-key -n M-e select-pane -U
+bind-key -n M-f select-pane -R
 
 # Splits and windows (no prefix needed)
-bind-key -n M-| split-window -h -c "#{pane_current_path}"
-bind-key -n M-- split-window -v -c "#{pane_current_path}"
+bind-key -n M-i split-window -h -c "#{pane_current_path}"
+bind-key -n M-\\ split-window -v -c "#{pane_current_path}"
 bind-key -n M-t new-window -c "#{pane_current_path}"
 bind-key -n M-w kill-pane
 
@@ -302,14 +302,14 @@ config.keys = {
   { key = "3", mods = "ALT", action = wezterm.action.SendKey { key = "3", mods = "ALT" } },
   { key = "4", mods = "ALT", action = wezterm.action.SendKey { key = "4", mods = "ALT" } },
   { key = "5", mods = "ALT", action = wezterm.action.SendKey { key = "5", mods = "ALT" } },
-  { key = "h", mods = "ALT", action = wezterm.action.SendKey { key = "h", mods = "ALT" } },
-  { key = "j", mods = "ALT", action = wezterm.action.SendKey { key = "j", mods = "ALT" } },
-  { key = "k", mods = "ALT", action = wezterm.action.SendKey { key = "k", mods = "ALT" } },
-  { key = "l", mods = "ALT", action = wezterm.action.SendKey { key = "l", mods = "ALT" } },
+  { key = "s", mods = "ALT", action = wezterm.action.SendKey { key = "s", mods = "ALT" } },
+  { key = "d", mods = "ALT", action = wezterm.action.SendKey { key = "d", mods = "ALT" } },
+  { key = "e", mods = "ALT", action = wezterm.action.SendKey { key = "e", mods = "ALT" } },
+  { key = "f", mods = "ALT", action = wezterm.action.SendKey { key = "f", mods = "ALT" } },
   { key = "t", mods = "ALT", action = wezterm.action.SendKey { key = "t", mods = "ALT" } },
   { key = "w", mods = "ALT", action = wezterm.action.SendKey { key = "w", mods = "ALT" } },
-  { key = "|", mods = "ALT", action = wezterm.action.SendKey { key = "|", mods = "ALT" } },
-  { key = "-", mods = "ALT", action = wezterm.action.SendKey { key = "-", mods = "ALT" } },
+  { key = "i", mods = "ALT", action = wezterm.action.SendKey { key = "i", mods = "ALT" } },
+  { key = "\\", mods = "ALT", action = wezterm.action.SendKey { key = "\\", mods = "ALT" } },
 }
 
 return config
@@ -360,5 +360,6 @@ echo "  • Neovim (Josean's config with tokyonight theme)"
 echo "  • ripgrep (for Telescope fuzzy search in nvim)"
 echo ""
 echo "👉 Restart WezTerm → lands in tmux automatically."
-echo "   ALT+T = new window  |  ALT+1-5 = switch windows  |  ALT+H/J/K/L = move panes"
+echo "   ALT+T = new window  |  ALT+1-5 = switch windows  |  ALT+E/S/D/F = move panes"
+echo "   ALT+I = split vertical  |  ALT+\\ = split horizontal  |  ALT+W = close pane"
 echo "   Then run 'nvim' to finish plugin setup."
