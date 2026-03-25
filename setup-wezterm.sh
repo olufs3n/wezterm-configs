@@ -37,7 +37,7 @@ fi
 echo ""
 echo "📦 Installing packages..."
 
-PACKAGES=(starship eza fzf nushell neovim ripgrep)
+PACKAGES=(starship eza fzf nushell neovim ripgrep tmux)
 for pkg in "${PACKAGES[@]}"; do
   if ! brew list "$pkg" &>/dev/null; then
     echo "  Installing $pkg..."
@@ -91,6 +91,11 @@ alias lt="eza --icons --tree --level=2"
 
 # Nushell-style table output
 alias lsn="nu -c 'ls'"
+
+# Auto-attach to tmux session (or create one)
+if command -v tmux &>/dev/null && [ -z "$TMUX" ]; then
+  tmux attach -t main 2>/dev/null || tmux new-session -s main
+fi
 ZSHRC
 echo "  ✅ ~/.zshrc written"
 
@@ -156,7 +161,62 @@ STARSHIP
 echo "  ✅ Starship config written"
 
 # ---------------------------
-# 8. Write WezTerm config
+# 8. Write tmux config
+# ---------------------------
+echo "📝 Writing ~/.tmux.conf..."
+cat > ~/.tmux.conf << 'TMUXCONF'
+# Prefix: CTRL+A (instead of default CTRL+B)
+set -g prefix C-a
+unbind C-b
+bind C-a send-prefix
+
+# True color support
+set -g default-terminal "tmux-256color"
+set -as terminal-overrides ",xterm*:Tc"
+
+# Mouse support
+set -g mouse on
+
+# Start windows and panes at 1 (not 0)
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+
+# Faster key repetition
+set -s escape-time 0
+
+# Window switching: ALT+1-5 (no prefix needed)
+bind-key -n M-1 select-window -t 1
+bind-key -n M-2 select-window -t 2
+bind-key -n M-3 select-window -t 3
+bind-key -n M-4 select-window -t 4
+bind-key -n M-5 select-window -t 5
+
+# Pane navigation: ALT+H/J/K/L (vim-style, no prefix)
+bind-key -n M-h select-pane -L
+bind-key -n M-j select-pane -D
+bind-key -n M-k select-pane -U
+bind-key -n M-l select-pane -R
+
+# Splits and windows (no prefix needed)
+bind-key -n M-| split-window -h -c "#{pane_current_path}"
+bind-key -n M-- split-window -v -c "#{pane_current_path}"
+bind-key -n M-t new-window -c "#{pane_current_path}"
+bind-key -n M-w kill-pane
+
+# Neofusion status bar
+set -g status-style "bg=#022236,fg=#e0d9c7"
+set -g status-left "#[bg=#2f516c,fg=#e0d9c7] #S #[bg=#022236,fg=#2f516c]"
+set -g status-right "#[fg=#2f516c,bg=#022236]#[bg=#2f516c,fg=#e0d9c7] %H:%M "
+set -g window-status-format "#[fg=#2f516c] #I:#W "
+set -g window-status-current-format "#[bg=#070f1c,fg=#ea6847] #I:#W "
+set -g status-left-length 30
+set -g status-position bottom
+TMUXCONF
+echo "  ✅ ~/.tmux.conf written"
+
+# ---------------------------
+# 9. Write WezTerm config
 # ---------------------------
 echo "📝 Writing ~/.wezterm.lua..."
 cat > ~/.wezterm.lua << 'WEZTERM'
@@ -233,12 +293,31 @@ config.hide_tab_bar_if_only_one_tab = false
 config.window_background_opacity = 0.95
 config.macos_window_background_blur = 20
 
+-- Pass ALT keys through to tmux (disable WezTerm's ALT interception)
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
+config.keys = {
+  { key = "1", mods = "ALT", action = wezterm.action.SendKey { key = "1", mods = "ALT" } },
+  { key = "2", mods = "ALT", action = wezterm.action.SendKey { key = "2", mods = "ALT" } },
+  { key = "3", mods = "ALT", action = wezterm.action.SendKey { key = "3", mods = "ALT" } },
+  { key = "4", mods = "ALT", action = wezterm.action.SendKey { key = "4", mods = "ALT" } },
+  { key = "5", mods = "ALT", action = wezterm.action.SendKey { key = "5", mods = "ALT" } },
+  { key = "h", mods = "ALT", action = wezterm.action.SendKey { key = "h", mods = "ALT" } },
+  { key = "j", mods = "ALT", action = wezterm.action.SendKey { key = "j", mods = "ALT" } },
+  { key = "k", mods = "ALT", action = wezterm.action.SendKey { key = "k", mods = "ALT" } },
+  { key = "l", mods = "ALT", action = wezterm.action.SendKey { key = "l", mods = "ALT" } },
+  { key = "t", mods = "ALT", action = wezterm.action.SendKey { key = "t", mods = "ALT" } },
+  { key = "w", mods = "ALT", action = wezterm.action.SendKey { key = "w", mods = "ALT" } },
+  { key = "|", mods = "ALT", action = wezterm.action.SendKey { key = "|", mods = "ALT" } },
+  { key = "-", mods = "ALT", action = wezterm.action.SendKey { key = "-", mods = "ALT" } },
+}
+
 return config
 WEZTERM
 echo "  ✅ ~/.wezterm.lua written"
 
 # ---------------------------
-# 9. Setup Neovim (Josean's config)
+# 10. Setup Neovim (Josean's config)
 # ---------------------------
 echo ""
 echo "📝 Setting up Neovim config..."
@@ -275,8 +354,11 @@ echo "  • eza (ls replacement with icons)"
 echo "  • fzf (fuzzy finder)"
 echo "  • Nushell (lsn alias for table output)"
 echo "  • JetBrainsMono Nerd Font"
-echo "  • WezTerm (Neofusion color scheme + styling)"
+echo "  • WezTerm (Neofusion color scheme + styling + ALT key passthrough)"
+echo "  • tmux (session persistence, ALT shortcuts, Neofusion status bar)"
 echo "  • Neovim (Josean's config with tokyonight theme)"
 echo "  • ripgrep (for Telescope fuzzy search in nvim)"
 echo ""
-echo "👉 Restart WezTerm, then run 'nvim' to finish plugin setup."
+echo "👉 Restart WezTerm → lands in tmux automatically."
+echo "   ALT+T = new window  |  ALT+1-5 = switch windows  |  ALT+H/J/K/L = move panes"
+echo "   Then run 'nvim' to finish plugin setup."
